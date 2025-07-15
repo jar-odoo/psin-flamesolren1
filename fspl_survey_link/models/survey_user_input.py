@@ -51,26 +51,23 @@ class SurveyUserInput(models.Model):
 
 
     def _save_lines(self, question, answer, comment, overwrite_existing=False):
+        SurveyUserInputLine = self.env['survey.user_input.line']
+
         if question.question_type == 'attachment':
             existing_lines = self.user_input_line_ids.filtered(lambda l: l.question_id == question)
             if overwrite_existing and existing_lines:
                 existing_lines.unlink()
 
+            user_input_line_dict = {'user_input_id': self.id, 'question_id': question.id, 'answer_type': False, 'skipped': True}
+
             if answer and answer.get('attachment_binary'):
-                self.env['survey.user_input.line'].create({
-                    'user_input_id': self.id,
-                    'question_id': question.id,
+                user_input_line_dict.update({
                     'answer_type': 'attachment',
                     'value_attachment_binary': answer['attachment_binary'],
                     'value_attachment_filename': answer.get('filename'),
                     'skipped': False,
                 })
-            else:
-                self.env['survey.user_input.line'].create({
-                    'user_input_id': self.id,
-                    'question_id': question.id,
-                    'answer_type': False,
-                    'skipped': True,
-                })
+
+            SurveyUserInputLine.create(user_input_line_dict)
         else:
             return super(SurveyUserInput, self)._save_lines(question, answer, comment, overwrite_existing)
