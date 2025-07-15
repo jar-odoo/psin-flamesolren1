@@ -51,8 +51,7 @@ class ProjectTask(models.Model):
                             ('state', '=', 'done')
                         ], limit=1)
 
-                        if user_input:
-                            survey_filled_once = True
+                        survey_filled_once = True if user_input else False
 
             task.survey_id = survey_id
             task.survey_filled_once = survey_filled_once

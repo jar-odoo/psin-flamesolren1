@@ -120,29 +120,13 @@ class SurveyAttachmentController(SurveyController):
         comment = None
         answers_no_comment = []
 
-        if question.question_type == 'attachment':
-            if answers and isinstance(answers, dict):
-                binary_data = answers.get('attachment_binary')
-                filename = answers.get('filename')
-                return {'attachment_binary': binary_data, 'filename': filename}, comment
-
         if answers:
-            if question.question_type == 'matrix':
-                if 'comment' in answers:
-                    comment = answers['comment'].strip()
-                    answers.pop('comment')
-                answers_no_comment = answers
-            else:
-                if not isinstance(answers, list):
-                    answers = [answers]
-                for answer in answers:
-                    if isinstance(answer, dict) and 'comment' in answer:
-                        comment = answer['comment'].strip()
-                    else:
-                        answers_no_comment.append(answer)
-                if len(answers_no_comment) == 1:
-                    answers_no_comment = answers_no_comment[0]
-        return answers_no_comment, comment
+            if question.question_type == 'attachment':
+                if answers and isinstance(answers, dict):
+                    binary_data = answers.get('attachment_binary')
+                    filename = answers.get('filename')
+                    return {'attachment_binary': binary_data, 'filename': filename}, comment
+        return super()._extract_comment_from_answers(question, answers)
 
     @http.route(['/survey/start/<string:survey_token>/<int:project_id>'], type='http', auth='public', website=True)
     def start_survey_with_project(self, survey_token, project_id, **post):
@@ -153,11 +137,10 @@ class SurveyAttachmentController(SurveyController):
     def survey_start(self, survey_token, **post):
         SurveyUserInput = request.env['survey.user_input'].sudo()
         survey = request.env['survey.survey'].sudo().search([('access_token', '=', survey_token)], limit=1)
+        project_id = request.session.get('project_id')
 
         if not survey:
             return request.redirect('/')
-
-        project_id = request.session.get('project_id')
 
         domain = [('survey_id', '=', survey.id), ('state', '=', 'done')]
         if project_id:
@@ -177,9 +160,7 @@ class SurveyAttachmentController(SurveyController):
         if not user_input:
             return request.redirect('/')
 
-        survey = user_input.survey_id
-
         return request.render('fspl_survey_link.already_filled_template', {
-            'survey': survey,
+            'survey': user_input.survey_id,
             'user_input': user_input,
         })
