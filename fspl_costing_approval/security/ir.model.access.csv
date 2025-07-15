@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_margin_master_user,access_margin_master_user,fspl_costing_approval.model_margin_master,base.group_user,1,0,0,0
+access_margin_master_manager,access_margin_master_manager,fspl_costing_approval.model_margin_master,base.group_erp_manager,1,1,1,0
+access_discount_master_user,access_discount_master_user,fspl_costing_approval.model_discount_master,base.group_user,1,0,0,0
+access_discount_master_manager,access_discount_master_manager,fspl_costing_approval.model_discount_master,base.group_erp_manager,1,1,1,0

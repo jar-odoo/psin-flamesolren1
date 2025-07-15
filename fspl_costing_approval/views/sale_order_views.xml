@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_form_inherit_optional_fields" model="ir.ui.view">
+        <field name="name">sale.order.form.optional.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_quotation_send']" position="attributes">
+                <attribute name="invisible">state != 'draft' or not (sales_30 and sales_70)</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_confirm']" position="attributes">
+                <attribute name="invisible">state != 'sent' or not (sales_30 and sales_70)</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_confirm'][2]" position="attributes">
+                <attribute name="invisible">state != 'draft' or not (sales_30 and sales_70)</attribute>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button
+                    name="action_open_discount_approval"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-diamond "
+                    invisible="not approval_requested"
+                    >Approval
+                </button>
+            </xpath>
+            <field name="payment_term_id" position="after">
+                <field name="approval_requested"/>
+                <field name="approval_request_id" readonly="1"/>
+                <field name="dc_capacity_kwp" readonly="approval_requested"/>
+                <field name="margin_amount" readonly="approval_requested"/>
+                <field name="discount_amount" readonly="approval_requested"/>
+            </field>
+            <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='quantity']" position="after">
+                <field name="required_qty" readonly="parent.approval_requested"/>
+                <field name="standard_cost_price" readonly="parent.approval_requested"/>
+                <field name="last_previous_price" readonly="parent.approval_requested"/>
+                <field name="tax_id" widget="many2many_tags" readonly="parent.approval_requested"/>
+                <field name="final_amount" readonly="parent.approval_requested"/>
+            </xpath>
+            <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='price_unit']" position="attributes">
+                <attribute name="readonly">parent.approval_requested</attribute>
+            </xpath>
+            <xpath expr="//page[@name='optional_products']/field[@name='sale_order_option_ids']" position="after">
+                <group name="note_group" col="12" class="mt-2 mt-md-0">
+                    <group colspan="4" class="order-1 order-lg-0">
+                        <field name="base_amount_per_kw" readonly="1"/>
+                        <field name="material_cost" readonly="1"/>
+                        <field name="expense_cost" readonly="1"/>
+                        <field name="margin_with_dc" readonly="approval_requested"/>
+                        <field name="discount_with_dc" readonly="approval_requested"/>
+                        <field name="final_sales_kwp_without_tax"/>
+                        <field name="final_amt_without_tax"/>
+                        <button
+                            name="apply_final_values"
+                            type="object"
+                            class="btn btn-sm oe_highlight"
+                            string="30 &amp; 70"
+                            invisible="sales_30 or sales_70"
+                        >
+                        </button>
+                        <field name="sales_70" readonly="1" invisible="not sales_70"/>
+                        <field name="sales_30" readonly="1" invisible="not sales_30"/>
+                    </group>
+                    <group class="oe_subtotal_footer d-flex order-0 order-lg-1 flex-column gap-0 gap-sm-3" colspan="2" name="sale_total">
+                        <field name="option_tax_totals" widget="account-tax-totals-field" nolabel="1" />
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

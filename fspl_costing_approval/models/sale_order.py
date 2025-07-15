@@ -1,0 +1,118 @@
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError
+
+
+class SaleOrder(models.Model):
+    _inherit = 'sale.order'
+
+    dc_capacity_kwp = fields.Float(string="DC Capacity (KWp)", tracking=True, copy=False)
+    base_amount_per_kw = fields.Float(string="Base Amount per KW", compute="_compute_base_amount", store=True, copy=False)
+    material_cost = fields.Float(string="Material Cost", store=True, compute="_compute_costs", copy=False)
+    expense_cost = fields.Float(string="Expense Cost", store=True, compute="_compute_costs", copy=False)
+    margin_amount = fields.Float(string="Margin", tracking=True, copy=False)
+    discount_amount = fields.Float(string="Discount", tracking=True, copy=False)
+    margin_with_dc = fields.Float(string="Margin with DC", copy=False)
+    discount_with_dc = fields.Float(string="Discount with DC", copy=False)
+    final_sales_kwp_without_tax = fields.Float(string="Final Amount /kwp Untaxed", copy=False)
+    final_amt_without_tax = fields.Float(string="Final Amount Untaxed", copy=False)
+    approval_requested = fields.Boolean(string="Approval Requested", copy=False, readonly=True)
+    sales_70 = fields.Float(string="70% Amount", readonly=True, copy=False)
+    sales_30 = fields.Float(string="30% Amount", readonly=True, copy=False)
+    option_tax_totals = fields.Binary(compute='_compute_option_tax_totals_json', exportable=False)
+    approval_request_id = fields.Many2one('approval.request', string='Discount Approval Request', readonly=True, copy=False)
+
+
+    def action_open_discount_approval(self):
+        self.ensure_one()
+        if self.approval_request_id:
+            return {
+                'name': 'Discount Approval',
+                'type': 'ir.actions.act_window',
+                'res_model': 'approval.request',
+                'res_id': self.approval_request_id.id,
+                'view_mode': 'form',
+                'target': 'current',
+                'context': {'default_sale_order_id': self.id},
+            }
+
+    @api.depends('dc_capacity_kwp', 'sale_order_option_ids')
+    def _compute_base_amount(self):
+        for order in self:
+            if order.dc_capacity_kwp > 0:
+                optional_products_untaxed_amt = sum(line.final_amount for line in order.sale_order_option_ids)
+                order.base_amount_per_kw = optional_products_untaxed_amt / order.dc_capacity_kwp
+                order.final_sales_kwp_without_tax = order.base_amount_per_kw + order.margin_with_dc - order.discount_with_dc
+                order.final_amt_without_tax = order.final_sales_kwp_without_tax * order.dc_capacity_kwp
+
+    @api.depends('sale_order_option_ids')
+    def _compute_costs(self):
+        for order in self:
+            material_total = 0.0
+            expense_total = 0.0
+            for line in order.sale_order_option_ids:
+                if line.product_id.type == 'product' and line.product_id.tracking != 'none':
+                    material_total += line.final_amount
+                elif line.product_id.type in ['service', 'consu']:
+                    expense_total += line.final_amount
+            order.material_cost = material_total
+            order.expense_cost = expense_total
+
+    def apply_final_values(self):
+        for order in self:
+            order.sales_70 = order.final_amt_without_tax * 0.70
+            order.sales_30 = order.final_amt_without_tax * 0.30
+
+    @api.depends_context('lang')
+    @api.depends('sale_order_option_ids.final_amount', 'currency_id', 'company_id', 'payment_term_id')
+    def _compute_option_tax_totals_json(self):
+        AccountTax = self.env['account.tax']
+        for order in self:
+            option_lines = order.sale_order_option_ids
+            base_lines = [line._prepare_base_line_for_taxes_computation() for line in option_lines]
+            AccountTax._add_tax_details_in_base_lines(base_lines, order.company_id)
+            AccountTax._round_base_lines_tax_details(base_lines, order.company_id)
+            order.option_tax_totals = AccountTax._get_tax_totals_summary(
+                base_lines=base_lines,
+                currency=order.currency_id or order.company_id.currency_id,
+                company=order.company_id,
+            )
+
+    @api.onchange('dc_capacity_kwp', 'margin_amount')
+    def _check_margin_or_raise_exception(self):
+        for order in self:
+            if not order.dc_capacity_kwp:
+                return
+            per_kw_margin = order.margin_amount * order.dc_capacity_kwp
+            margin_master = self.env['margin.master'].search([('user_ids', 'in', self.env.user.id), '|', ('city_id', '=', order.partner_id.city_id.id), ('city_id.name', '=', order.partner_id.city)], limit=1)
+            if not margin_master:
+                continue
+            if per_kw_margin and per_kw_margin > margin_master.margin_per_kw:
+                raise UserError(_("Margin exceeds, allowed value is %s per KW" % margin_master.margin_per_kw))
+            else:
+                order.margin_with_dc = per_kw_margin
+
+    @api.onchange('discount_amount', 'dc_capacity_kwp')
+    def action_check_discount_and_create_approval(self):
+        for order in self:
+            per_kw_discount = order.discount_amount * order.dc_capacity_kwp
+            discount_master = self.env['discount.master'].search([
+                ('user_ids', 'in', self.env.user.id),
+                '|',
+                ('city_id', '=', order.partner_id.city_id.id),
+                ('city_id.name', '=', order.partner_id.city)
+            ], limit=1)
+            if discount_master and per_kw_discount > discount_master.discount_per_kw:
+                approval = self.env['approval.request'].create({
+                    'name': f"Discount Approval for {order.name}",
+                    'request_owner_id': self.env.user.id,
+                    'category_id': discount_master.approval_category_id.id,
+                    'sale_order_id': order._origin.id,
+                    'reason': f"Discount of ₹{order.discount_amount} exceeds allowed per-kW for {order.dc_capacity_kwp} kW",
+                })
+                order._origin.write({
+                    'approval_request_id': approval.id,
+                    'approval_requested': True
+                    })
+                order.action_lock()
+            else:
+                order.discount_with_dc = per_kw_discount
