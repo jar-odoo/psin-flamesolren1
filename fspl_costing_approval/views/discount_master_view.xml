@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_discount_master_form" model="ir.ui.view">
+        <field name="name">discount.master.form</field>
+        <field name="model">discount.master</field>
+        <field name="arch" type="xml">
+            <form string="Dsicount Master">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="discount_per_kw"/>
+                        <field name="user_ids" widget="many2many_tags"/>
+                        <field name="city_id"/>
+                        <field name="approval_category_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_discount_master_tree" model="ir.ui.view">
+        <field name="name">discount.master.tree</field>
+        <field name="model">discount.master</field>
+        <field name="arch" type="xml">
+            <list string="Discount Masters">
+                <field name="name"/>
+                <field name="discount_per_kw"/>
+                <field name="city_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_discount_master" model="ir.actions.act_window">
+        <field name="name">Discount Master</field>
+        <field name="res_model">discount.master</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create discount records to assign per-kW margins by user and city.</p>
+        </field>
+    </record>
+    <menuitem id="menu_discount_master" name="Discount Master" parent="sale.menu_sale_config" action="action_discount_master" sequence="3"/>
+</odoo>
