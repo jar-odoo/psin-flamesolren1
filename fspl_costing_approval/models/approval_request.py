@@ -5,16 +5,16 @@ class ApprovalRequest(models.Model):
 
     sale_order_id = fields.Many2one('sale.order', string='Related Quotation')
 
-    def action_approve(self):
-        res = super().action_approve()
+    def action_approve(self, approver=None):
+        res = super().action_approve(approver)
         for req in self.filtered(lambda r: r.sale_order_id):
             order = req.sale_order_id
             order.action_unlock()
             order.discount_with_dc = order.discount_amount * order.dc_capacity_kwp
         return res
 
-    def action_refuse(self):
-        res = super().action_refuse()
+    def action_refuse(self, approver=None):
+        res = super().action_refuse(approver)
         for req in self.filtered(lambda r: r.sale_order_id):
             order = req.sale_order_id
             order.action_unlock()

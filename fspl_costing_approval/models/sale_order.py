@@ -39,7 +39,7 @@ class SaleOrder(models.Model):
     def _compute_base_amount(self):
         for order in self:
             if order.dc_capacity_kwp > 0:
-                optional_products_untaxed_amt = sum(line.final_amount for line in order.sale_order_option_ids)
+                optional_products_untaxed_amt = sum(order.sale_order_option_ids.mapped('final_amount'))
                 order.base_amount_per_kw = optional_products_untaxed_amt / order.dc_capacity_kwp
                 order.final_sales_kwp_without_tax = order.base_amount_per_kw + order.margin_with_dc - order.discount_with_dc
                 order.final_amt_without_tax = order.final_sales_kwp_without_tax * order.dc_capacity_kwp
