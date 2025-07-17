@@ -5,12 +5,12 @@ from odoo.exceptions import UserError
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    dc_capacity_kwp = fields.Float(string="DC Capacity (KWp)", tracking=True, copy=False)
+    dc_capacity_kwp = fields.Float(string="DC Capacity (KWp)", tracking=True, copy=False, store=True)
     base_amount_per_kw = fields.Float(string="Base Amount per KW", compute="_compute_base_amount", store=True, copy=False)
     material_cost = fields.Float(string="Material Cost", store=True, compute="_compute_costs", copy=False)
     expense_cost = fields.Float(string="Expense Cost", store=True, compute="_compute_costs", copy=False)
-    margin_amount = fields.Float(string="Margin", tracking=True, copy=False)
-    discount_amount = fields.Float(string="Discount", tracking=True, copy=False)
+    margin_amount = fields.Float(string="Margin", tracking=True, copy=False, store=True)
+    discount_amount = fields.Float(string="Discount", tracking=True, copy=False, store=True)
     margin_with_dc = fields.Float(string="Margin with DC", copy=False)
     discount_with_dc = fields.Float(string="Discount with DC", copy=False)
     final_sales_kwp_without_tax = fields.Float(string="Final Amount /kwp Untaxed", copy=False)
@@ -35,7 +35,7 @@ class SaleOrder(models.Model):
                 'context': {'default_sale_order_id': self.id},
             }
 
-    @api.depends('dc_capacity_kwp', 'sale_order_option_ids')
+    @api.depends('dc_capacity_kwp', 'sale_order_option_ids', 'margin_with_dc', 'discount_with_dc', 'final_sales_kwp_without_tax')
     def _compute_base_amount(self):
         for order in self:
             if order.dc_capacity_kwp > 0:
@@ -50,9 +50,9 @@ class SaleOrder(models.Model):
             material_total = 0.0
             expense_total = 0.0
             for line in order.sale_order_option_ids:
-                if line.product_id.type == 'product' and line.product_id.tracking != 'none':
+                if line.product_id.is_storable and line.product_id.tracking != 'none':
                     material_total += line.final_amount
-                elif line.product_id.type in ['service', 'consu']:
+                else:
                     expense_total += line.final_amount
             order.material_cost = material_total
             order.expense_cost = expense_total
@@ -101,6 +101,8 @@ class SaleOrder(models.Model):
                 ('city_id', '=', order.partner_id.city_id.id),
                 ('city_id.name', '=', order.partner_id.city)
             ], limit=1)
+            if not discount_master:
+                continue
             if discount_master and per_kw_discount > discount_master.discount_per_kw:
                 approval = self.env['approval.request'].create({
                     'name': f"Discount Approval for {order.name}",
