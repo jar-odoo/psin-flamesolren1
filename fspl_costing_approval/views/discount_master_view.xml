@@ -26,6 +26,8 @@
                 <field name="name"/>
                 <field name="discount_per_kw"/>
                 <field name="city_id"/>
+                <field name="user_ids" widget="many2many_tags"/>
+                <field name="approval_category_id"/>
             </list>
         </field>
     </record>
@@ -38,5 +40,5 @@
             <p class="o_view_nocontent_smiling_face">Create discount records to assign per-kW margins by user and city.</p>
         </field>
     </record>
-    <menuitem id="menu_discount_master" name="Discount Master" parent="sale.menu_sale_config" action="action_discount_master" sequence="3"/>
+    <menuitem id="menu_discount_master" name="Discount Master" parent="sale.menu_sale_config" action="action_discount_master" sequence="11"/>
 </odoo>
