@@ -57,9 +57,9 @@
                     </group>
                 </group>
             </xpath>
-            <field name="sale_order_option_ids" position="attributes">
-                <attribute name="readonly">0</attribute>
-            </field>
+            <page name="optional_products" position="attributes">
+                <attribute name="invisible"></attribute>
+            </page>
         </field>
     </record>
 
