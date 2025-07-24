@@ -9,7 +9,7 @@ class StockMove(models.Model):
 
     def _get_last_purchase_price_and_total_amount(self):
         for move in self:
-            if move.picking_id and move.picking_id.picking_type_id.is_last_purchase_price:
+            if move.picking_id and move.picking_id.is_last_purchase_price:
                 move.last_purchase_price = move.product_id.last_price
-            if move.picking_id and move.picking_id.picking_type_id.is_total_amount:
+            if move.picking_id and move.picking_id.is_total_amount:
                 move.total_amount = move.last_purchase_price * move.quantity
