@@ -1,0 +1,67 @@
+<odoo>
+
+    <template id="survey_remove_retry_inherit" inherit_id="survey.survey_button_retake">
+        <xpath expr="//div[hasclass('d-print-none')]" position="attributes">
+            <attribute name="style">display: none !important;</attribute>
+        </xpath>
+    </template>
+
+    <template id="already_filled_template" name="Already Filled Thank You Page">
+        <t t-call="survey.layout">
+            <div class="o_survey_background d-flex justify-content-center align-items-center"
+                style="min-height: 100vh;">
+                <div class="o_survey_main_container shadow rounded p-5 bg-white"
+                    style="max-width: 800px; width: 100%;">
+                    <div class="text-center">
+                        <h1 class="o_survey_done_title mb-3 text-success">🎉 Thank You!</h1>
+                        <p class="o_survey_done_message text-muted fs-5 mb-4">
+                            You have already completed this survey. We appreciate your feedback!
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="survey_form_enctype_inherit" inherit_id="survey.survey_fill_form">
+        <xpath expr="//form" position="attributes">
+            <attribute name="enctype">multipart/form-data</attribute>
+        </xpath>
+    </template>
+
+    <template id="survey_question_spacing_fix" inherit_id="survey.question_container">
+        <xpath expr="//div[@class='mb-4']" position="replace">
+            <div class="mb-2">
+                <h3 t-if="not hide_question_title" class="mb-1">
+                    <span t-field='question.title' class="text-break"/>
+                    <span t-if="question.constr_mandatory" class="text-danger">*</span>
+                </h3>
+                <div t-if="not is_html_empty(question.description)"
+                     t-field='question.description'
+                     class="text-muted text-break"/>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="survey_question_attachment" inherit_id="survey.question_container" priority="1000">
+        <xpath expr="." position="inside">
+            <t t-if="question.question_type == 'attachment'" t-call="survey_link.question_attachment" />
+        </xpath>
+    </template>
+
+    <template id="question_attachment" name="Question: attachment upload">
+        <div class="form-group mb-4">
+            <label class="form-label fw-semibold" for="attachment_file">
+                Upload your file
+            </label>
+            <input type="file"
+                id="attachment_file"
+                name="attachment_file"
+                class="form-control" />
+            <input type="hidden" name="question_id" t-att-value="question.id" /><br/><br/><br/><br/>
+        </div>
+    </template>
+
+
+</odoo>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_task_form_inherit_survey" model="ir.ui.view">
+        <field name="name">project.task.survey.link</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2" />
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='date_deadline_and_recurring_task']" position="after">
+                <field name="survey_link" widget="url" />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_project_task_form_inherit_survey_attachment" model="ir.ui.view">
+        <field name="name">project.task.form.survey.attachments</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2" />
+        <field name="arch" type="xml">
+            <xpath expr="//div[@class='oe_button_box']" position="inside">
+                    <button name="%(action_survey_attachment_lines_from_task)d"
+                        type="action"
+                        class="oe_stat_button"
+                        icon="fa-file-text-o">
+                        <field name="survey_id" widget="statinfo" string="Documents" />
+                    </button>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
