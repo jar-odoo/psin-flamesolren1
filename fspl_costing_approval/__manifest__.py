@@ -1,7 +1,7 @@
 
 {
     "name": "FSPL Sales Costing Approval",
-    "version": "1.0",
+    "version": "2.0",
     "category": "Sales",
     "summary": "Custom Margin and Cost Calculation for Sales",
     "odoo_task_id": "4852586",
