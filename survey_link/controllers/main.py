@@ -30,6 +30,7 @@ class SurveyAttachmentController(SurveyController):
                 filename_key = f'attachment_filename_{attachment_index}'
                 mimetype_key = f'attachment_mimetype_{attachment_index}'
 
+                # Extract values from post data
                 attachment_binary = post.get(answer_key)
                 attachment_filename = post.get(filename_key)
                 attachment_mimetype = post.get(mimetype_key)
@@ -43,7 +44,7 @@ class SurveyAttachmentController(SurveyController):
                 else:
                     post[str(question.id)] = {}
 
-                attachment_index += 1
+                attachment_index += 1  # Move to next file
 
         if not answer_sudo.test_entry and not survey_sudo._has_attempts_left(
                 answer_sudo.partner_id, answer_sudo.email, answer_sudo.invite_token):
@@ -67,6 +68,7 @@ class SurveyAttachmentController(SurveyController):
             if question in inactive_questions:
                 continue
             answer, comment = self._extract_comment_from_answers(question, post.get(str(question.id)))
+            # breakpoint()
             errors.update(question.validate_question(answer, comment))
             if not errors.get(question.id):
                 answer_sudo._save_lines(
@@ -144,6 +146,11 @@ class SurveyAttachmentController(SurveyController):
                     answers_no_comment = answers_no_comment[0]
         return answers_no_comment, comment
 
+    @http.route(['/survey/start/<string:survey_token>/<int:project_id>'], type='http', auth='public', website=True)
+    def start_survey_with_project(self, survey_token, project_id, **post):
+        request.session['project_id'] = project_id
+        return request.redirect('/survey/start/' + survey_token)
+
     @http.route(['/survey/start/<string:survey_token>'], type='http', auth='public', website=True)
     def survey_start(self, survey_token, **post):
         SurveyUserInput = request.env['survey.user_input'].sudo()
@@ -152,10 +159,13 @@ class SurveyAttachmentController(SurveyController):
         if not survey:
             return request.redirect('/')
 
-        user_input = SurveyUserInput.search([
-            ('survey_id', '=', survey.id),
-            ('state', '=', 'done')
-        ], limit=1)
+        project_id = request.session.get('project_id')
+
+        domain = [('survey_id', '=', survey.id), ('state', '=', 'done')]
+        if project_id:
+            domain.append(('project_id', '=', project_id))
+
+        user_input = SurveyUserInput.search(domain, limit=1)
 
         if user_input:
             return request.redirect(f'/survey/already_filled/{user_input.access_token}')

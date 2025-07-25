@@ -5,7 +5,11 @@
     'installable': True,
     'license': 'LGPL-3',
     'summary': 'Help connecting survey with task.',
-    'depends': ['base', 'project', 'survey'],
+    'depends': [
+        'base',
+        'project',
+        'survey'
+    ],
     'data': [
         'views/survey_attachment_list_view.xml',
         'views/project_task_views.xml',

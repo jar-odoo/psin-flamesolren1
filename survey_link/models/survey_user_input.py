@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.http import request
 
 
 class SurveyUserInput(models.Model):
@@ -6,12 +7,20 @@ class SurveyUserInput(models.Model):
 
     task_id = fields.Many2one('project.task', string='Task')
     task_name = fields.Char(string="Task Name")
+    project_id = fields.Many2one(related='task_id.project_id', store=True)
 
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
+            # Try to assign project_id from session if not already provided
+            if 'project_id' not in vals and request and request.session.get('project_id'):
+                vals['project_id'] = request.session['project_id']
+
             if vals.get('survey_id') and not vals.get('task_id'):
-                task = self.env['project.task'].sudo().search([('survey_id', '=', vals['survey_id'])], limit=1)
+                domain = [('survey_id', '=', vals['survey_id'])]
+                if vals.get('project_id'):
+                    domain.append(('project_id', '=', vals['project_id']))
+                task = self.env['project.task'].sudo().search(domain, limit=1)
                 if task:
                     vals['task_id'] = task.id
                     vals['task_name'] = task.name
@@ -23,6 +32,7 @@ class SurveyUserInput(models.Model):
                 record.task_id.sudo()._compute_survey_data()
 
         return records
+
 
     def write(self, vals):
         res = super().write(vals)
