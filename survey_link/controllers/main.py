@@ -30,7 +30,6 @@ class SurveyAttachmentController(SurveyController):
                 filename_key = f'attachment_filename_{attachment_index}'
                 mimetype_key = f'attachment_mimetype_{attachment_index}'
 
-                # Extract values from post data
                 attachment_binary = post.get(answer_key)
                 attachment_filename = post.get(filename_key)
                 attachment_mimetype = post.get(mimetype_key)
@@ -68,7 +67,6 @@ class SurveyAttachmentController(SurveyController):
             if question in inactive_questions:
                 continue
             answer, comment = self._extract_comment_from_answers(question, post.get(str(question.id)))
-            # breakpoint()
             errors.update(question.validate_question(answer, comment))
             if not errors.get(question.id):
                 answer_sudo._save_lines(

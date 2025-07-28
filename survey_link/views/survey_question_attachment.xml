@@ -31,7 +31,7 @@
     </template>
 
     <template id="survey_question_spacing_fix" inherit_id="survey.question_container">
-        <xpath expr="//div[@class='mb-4']" position="replace">
+        <xpath expr="//div[hasclass('mb-4')]" position="replace">
             <div class="mb-2">
                 <h3 t-if="not hide_question_title" class="mb-1">
                     <span t-field='question.title' class="text-break"/>

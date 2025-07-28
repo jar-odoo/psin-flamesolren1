@@ -31,7 +31,6 @@ class ProjectTask(models.Model):
                     if not user_input:
                         raise ValidationError(_("You cannot move to a closed state without completing the survey."))
 
-                    # Optional: set flag if not already set
                     task.sudo().survey_filled_once = True
 
         return super(ProjectTask, self).write(vals)

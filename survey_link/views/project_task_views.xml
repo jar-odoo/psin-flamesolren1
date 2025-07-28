@@ -32,7 +32,7 @@
         <field name="model">project.task</field>
         <field name="inherit_id" ref="project.view_task_form2" />
         <field name="arch" type="xml">
-            <xpath expr="//div[@class='oe_button_box']" position="inside">
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
                 <button name="%(action_survey_attachment_lines_from_task)d"
                     type="action"
                     class="oe_stat_button"
