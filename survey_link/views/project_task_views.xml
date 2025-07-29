@@ -10,7 +10,7 @@
                     type="object"
                     string="Open Survey"
                     class="btn-primary"
-                    invisible="not survey_link" />
+                    invisible="not survey_link or survey_filled_once" />
             </xpath>
             <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
                 <button name="%(action_survey_attachment_lines_from_task)d"

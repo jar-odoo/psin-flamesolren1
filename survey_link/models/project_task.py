@@ -2,23 +2,21 @@ from odoo import models, fields, api, _
 import re
 from odoo.exceptions import ValidationError
 
-from odoo.addons.project.models.project_task import CLOSED_STATES
 
 class ProjectTask(models.Model):
     _inherit = 'project.task'
 
     survey_link = fields.Char(string="Survey Link")
     survey_id = fields.Many2one('survey.survey', string="Survey", compute="_compute_survey_data", store=True)
-    survey_filled_once = fields.Boolean(string="Survey Already Filled", compute="_compute_survey_data", store=True)
+    survey_filled_once = fields.Boolean(string="Survey Already Filled", compute="_compute_survey_data", store=True, copy=False)
 
     def write(self, vals):
+        res = super().write(vals)
         for task in self:
             new_state = vals.get('state', task.state)
 
-            closed_states = ['03_approved'] + list(CLOSED_STATES.keys())
-            if new_state in closed_states:
+            if new_state == '1_done':
                 if task.survey_id and not task.survey_filled_once:
-                    # Check if survey.user_input exists for this task and is done
                     user_input = self.env['survey.user_input'].sudo().search([
                         ('survey_id', '=', task.survey_id.id),
                         ('task_id', '=', task.id),
@@ -28,11 +26,9 @@ class ProjectTask(models.Model):
                     if not user_input:
                         raise ValidationError(_("You cannot move to a closed state without completing the survey."))
 
-                    task.sudo().survey_filled_once = True
+                    task.survey_filled_once = True
+        return res
 
-        return super(ProjectTask, self).write(vals)
-    
-    
     @api.depends('survey_link')
     def _compute_survey_data(self):
         for task in self:
@@ -51,6 +47,7 @@ class ProjectTask(models.Model):
                         survey_id = survey.id
                         user_input = self.env['survey.user_input'].sudo().search([
                             ('survey_id', '=', survey_id),
+                            ('task_id', '=', task.id),
                             ('state', '=', 'done')
                         ], limit=1)
 
@@ -74,4 +71,3 @@ class ProjectTask(models.Model):
             'url': url,
             'target': 'new'
         }
-
