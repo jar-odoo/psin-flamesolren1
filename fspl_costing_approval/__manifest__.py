@@ -23,6 +23,7 @@
         "views/stock_picking_type_view.xml",
         "views/stock_picking_view.xml",
     ],
+    "license": 'LGPL-3',
     "installable": True,
     "application": False
 }
