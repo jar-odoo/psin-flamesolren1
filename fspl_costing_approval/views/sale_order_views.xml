@@ -5,15 +5,6 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//button[@name='action_quotation_send']" position="attributes">
-                <attribute name="invisible">state != 'draft' or not (sales_30 and sales_70)</attribute>
-            </xpath>
-            <xpath expr="//button[@name='action_confirm']" position="attributes">
-                <attribute name="invisible">state != 'sent' or not (sales_30 and sales_70)</attribute>
-            </xpath>
-            <xpath expr="//button[@name='action_confirm'][2]" position="attributes">
-                <attribute name="invisible">state != 'draft' or not (sales_30 and sales_70)</attribute>
-            </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_open_discount_approval" type="object" class="oe_stat_button" icon="fa-diamond" invisible="not approval_requested">Approval
                 </button>
@@ -35,8 +26,8 @@
             </field>
             <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='quantity']" position="after">
                 <field name="required_qty" readonly="parent.approval_requested"/>
-                <field name="standard_cost_price" readonly="parent.approval_requested"/>
-                <field name="last_previous_price" readonly="parent.approval_requested"/>
+                <field name="standard_cost_price" readonly="1"/>
+                <field name="last_previous_price" readonly="1"/>
                 <field name="tax_id" widget="many2many_tags" readonly="parent.approval_requested"/>
             </xpath>
             <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='discount']" position="after">
