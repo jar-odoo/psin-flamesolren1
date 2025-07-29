@@ -35,8 +35,8 @@
             </field>
             <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='quantity']" position="after">
                 <field name="required_qty" readonly="parent.approval_requested"/>
-                <field name="standard_cost_price" readonly="parent.approval_requested"/>
-                <field name="last_previous_price" readonly="parent.approval_requested"/>
+                <field name="standard_cost_price" readonly="1"/>
+                <field name="last_previous_price" readonly="1"/>
                 <field name="tax_id" widget="many2many_tags" readonly="parent.approval_requested"/>
             </xpath>
             <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='discount']" position="after">
