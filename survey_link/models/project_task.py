@@ -2,10 +2,7 @@ from odoo import models, fields, api, _
 import re
 from odoo.exceptions import ValidationError
 
-CLOSED_STATES = {
-    '1_done': 'Done',
-    '1_canceled': 'Cancelled',
-}
+from odoo.addons.project.models.project_task import CLOSED_STATES
 
 class ProjectTask(models.Model):
     _inherit = 'project.task'
@@ -39,8 +36,8 @@ class ProjectTask(models.Model):
     @api.depends('survey_link')
     def _compute_survey_data(self):
         for task in self:
-            task.survey_id = False
-            task.survey_filled_once = False
+            survey_id = False
+            survey_filled_once = False
 
             if task.survey_link:
                 match = re.search(r'/survey/start/([^/?#]+)', task.survey_link)
@@ -51,14 +48,17 @@ class ProjectTask(models.Model):
                         limit=1
                     )
                     if survey:
-                        task.survey_id = survey.id
+                        survey_id = survey.id
                         user_input = self.env['survey.user_input'].sudo().search([
-                            ('survey_id', '=', survey.id),
+                            ('survey_id', '=', survey_id),
                             ('state', '=', 'done')
                         ], limit=1)
 
                         if user_input:
-                            task.survey_filled_once = True
+                            survey_filled_once = True
+
+            task.survey_id = survey_id
+            task.survey_filled_once = survey_filled_once
 
     def action_open_survey_link(self):
         self.ensure_one()
