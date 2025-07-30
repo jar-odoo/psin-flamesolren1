@@ -2,10 +2,11 @@
     <record id="survey_user_input_view_tree_inherit_task" model="ir.ui.view">
         <field name="name">survey.user_input.tree.task</field>
         <field name="model">survey.user_input</field>
-        <field name="inherit_id" ref="survey.survey_user_input_view_tree"/>
+        <field name="inherit_id" ref="survey.survey_user_input_view_tree" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='deadline']" position="after">
-                <field name="task_name"/>
+                <field name="task_name" />
+                <field name="project_name" />
             </xpath>
         </field>
     </record>
@@ -13,15 +14,16 @@
     <record id="survey_user_input_line_view_form_attachment_inherit" model="ir.ui.view">
         <field name="name">survey.user_input.line.view.form.attachment.inherit</field>
         <field name="model">survey.user_input.line</field>
-        <field name="inherit_id" ref="survey.survey_user_input_line_view_form"/>
+        <field name="inherit_id" ref="survey.survey_user_input_line_view_form" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='answer_type']" position="after">
-                <field name="attachment_ids"
-                       widget="many2many_binary"
-                       string="Uploaded Attachments"
-                       invisible="answer_type != 'attachment'"/>
+                <field name="value_attachment_binary"
+                    widget="binary"
+                    filename="value_attachment_filename"
+                    string="Uploaded Attachment"
+                    invisible="answer_type != 'attachment'" />
             </xpath>
         </field>
     </record>
-    
+
 </odoo>

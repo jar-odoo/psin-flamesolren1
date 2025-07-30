@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="project.view_task_form2" />
         <field name="arch" type="xml">
             <xpath expr="//div[@id='date_deadline_and_recurring_task']" position="after">
-                <field name="survey_link"/>
+                <field name="survey_link" readonly="sale_line_id"/>
             </xpath>
         </field>
     </record>
@@ -21,7 +21,8 @@
                 <button name="action_open_survey_link"
                     type="object"
                     string="Open Survey"
-                    class="btn-primary" />
+                    class="btn-primary"
+                    invisible="not survey_link" />
             </xpath>
         </field>
     </record>
@@ -37,7 +38,7 @@
                     type="action"
                     class="oe_stat_button"
                     icon="fa-file-text-o">
-                    <field name="survey_id" widget="statinfo" string="Documents" />
+                    <field name="survey_id" widget="statinfo" string="Files" />
                 </button>
             </xpath>
         </field>

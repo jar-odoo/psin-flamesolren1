@@ -9,48 +9,9 @@ class SurveyUserInputLine(models.Model):
 
     answer_type = fields.Selection(selection_add=[('attachment', 'Attachment')])
     value_attachment_binary = fields.Binary("Attachment File", readonly=True)
-    value_attachment_filename = fields.Char("Attachment Filename")
+    value_attachment_filename = fields.Char("Attachment Filename", readonly=True)
     title = fields.Char("Question Title", compute='_compute_question_title', store=False)
     task_id = fields.Many2one('project.task', string='Task', related='user_input_id.task_id', store=True)
-
-    attachment_ids = fields.Many2many(
-        'ir.attachment',
-        string="Uploaded Attachments",
-        compute="_compute_attachment_ids",
-        store=True,
-    )
-
-    @api.depends('value_attachment_binary', 'value_attachment_filename')
-    def _compute_attachment_ids(self):
-        for line in self:
-            if line.answer_type != 'attachment':
-                line.attachment_ids = [(5, 0, 0)]
-                continue
-
-            if line.value_attachment_binary and line.value_attachment_filename:
-                existing_attachment = self.env['ir.attachment'].search([
-                    ('res_model', '=', 'survey.user_input.line'),
-                    ('res_id', '=', line.id),
-                    ('name', '=', line.value_attachment_filename),
-                ], limit=1)
-
-                if not existing_attachment:
-                    attachment = self.env['ir.attachment'].create({
-                        'name': line.value_attachment_filename,
-                        'type': 'binary',
-                        'datas': line.value_attachment_binary,
-                        'res_model': 'survey.user_input.line',
-                        'res_id': line.id,
-                        'mimetype': 'application/octet-stream',
-                    })
-                    line.attachment_ids = [attachment.id]
-                    line.value_attachment_binary = False
-                else:
-                    line.attachment_ids = [existing_attachment.id]
-                    line.value_attachment_binary = False
-            else:
-                line.attachment_ids = [(5, 0, 0)]
-
 
     @api.depends('question_id')
     def _compute_question_title(self):

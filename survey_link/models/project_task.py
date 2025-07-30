@@ -63,6 +63,11 @@ class ProjectTask(models.Model):
     def action_open_survey_link(self):
         self.ensure_one()
 
+        pattern = r"^(https?://[\w\-.:]+)?/survey/start/[\w\-]+$"
+
+        if not self.survey_link or not re.match(pattern, self.survey_link):
+            raise ValidationError(_("Survey link is not valid. It must match /survey/start/<survey_token>/<project_id>"))
+
         url = self.survey_link + '/' + str(self.project_id.id)
         return {
             'type': 'ir.actions.act_url',

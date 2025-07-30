@@ -6,9 +6,10 @@
     'license': 'LGPL-3',
     'summary': 'Help connecting survey with task.',
     'depends': [
-        'base',
         'project',
-        'survey'
+        'survey',
+        'sale_management',
+        'sale_project'
     ],
     'data': [
         'views/survey_attachment_list_view.xml',
@@ -20,6 +21,9 @@
     'assets': {
         'survey.survey_assets': [
             'survey_link/static/src/js/survey_attachment_upload.js',
+        ],
+        'web.assets_tests': [
+            'survey_link/static/tests/tours/certification_failure.js',
         ],
     },
 }
