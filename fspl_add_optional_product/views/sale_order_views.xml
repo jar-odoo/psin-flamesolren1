@@ -23,8 +23,7 @@
                     <button name="action_add_selected_options_to_order"
                             type="object"
                             string="Add to Cart"
-                            class="btn btn-primary"
-                            invisible="all_options_added_to_sale_order"/>
+                            class="btn btn-primary"/>
                 </div>
             </xpath>
         </field>

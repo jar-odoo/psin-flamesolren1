@@ -11,10 +11,12 @@ class SaleOrderOption(models.Model):
 
         if self.product_id in existing_products:
             return
-        result = self.add_option_to_order()
-        self.is_selected =False
-        result.write({
-            'product_uom_qty': self.required_qty,
-            'price_unit': 0.00,
-            'tax_id': False,
-        })
+        self.add_option_to_order()
+
+    def _get_values_to_add_to_order(self):
+        self.ensure_one()
+        result = super()._get_values_to_add_to_order()
+        result['price_unit'] = 0.00
+        result['product_uom_qty'] = self.required_qty
+        return result
+
