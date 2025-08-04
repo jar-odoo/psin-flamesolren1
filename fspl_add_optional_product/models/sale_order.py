@@ -7,7 +7,8 @@ class SaleOrder(models.Model):
     select_all_options = fields.Boolean(string="Select All Optional Products")
 
     def action_add_selected_options_to_order(self):
-        selected_options = self.sale_order_option_ids.filtered(lambda opt: opt.is_selected)
+        # Filter remove all option line which is present in order line.
+        selected_options = self.sale_order_option_ids.filtered(lambda opt: opt.is_selected and not opt.is_present)
         for option in selected_options:
             option.button_add_to_order()
         self.select_all_options = False
