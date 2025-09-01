@@ -1,0 +1,23 @@
+<odoo>
+    <record id="survey_attachment_user_input_line_view" model="ir.ui.view">
+        <field name="name">survey.user_input.line.attachment.list</field>
+        <field name="model">survey.user_input.line</field>
+        <field name="arch" type="xml">
+            <list string="Survey Attachments" editable="bottom">
+                <field name="value_attachment_filename"/>
+                <field name="value_attachment_binary" widget="binary" filename="value_attachment_filename" string="File"/>
+                <field name="title"/>
+                <field name="create_date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_survey_attachment_lines_from_task" model="ir.actions.act_window">
+        <field name="name">Survey Attachments</field>
+        <field name="res_model">survey.user_input.line</field>
+        <field name="view_mode">list</field>
+        <field name="domain">[('task_id', '=', active_id), ('question_id.question_type', '=', 'attachment'), ('value_attachment_binary', '!=', False)]</field>
+        <field name="context">{}</field>
+    </record>
+    
+</odoo>

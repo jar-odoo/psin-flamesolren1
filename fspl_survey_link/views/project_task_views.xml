@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_task_form_inherit_survey" model="ir.ui.view">
+        <field name="name">project.task.survey.link</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2" />
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_open_survey_link"
+                    type="object"
+                    string="Open Survey"
+                    class="btn-primary"
+                    invisible="not survey_link or survey_filled_once" />
+            </xpath>
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button name="%(action_survey_attachment_lines_from_task)d"
+                    type="action"
+                    class="oe_stat_button"
+                    icon="fa-file-text-o">
+                    <field name="survey_id" widget="statinfo" string="Files" />
+                </button>
+            </xpath>
+            <xpath expr="//div[@id='date_deadline_and_recurring_task']" position="after">
+                <field name="survey_link" readonly="sale_line_id"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
