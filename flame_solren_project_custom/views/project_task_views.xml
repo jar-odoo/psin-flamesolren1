@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_task_form_inherit" model="ir.ui.view">
+        <field name="name">project.task.form.inherit</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='dependent_tasks_count']" position="attributes">
+                <attribute name="string">Blocked By</attribute>
+            </xpath>
+            <xpath expr="//div[@name='repeat_intervals']/parent::group" position="inside">
+                <field name="no_of_days" readonly="sale_line_id"/>
+                <label for="planned_scheduled_end_date" string="Plan Schedule" invisible="not planned_scheduled_start_date"/>
+                <field name="planned_scheduled_end_date" wigdet="daterange" options="{'start_date_field': 'planned_scheduled_start_date'}" nolabel="1"/>
+                <field name="planned_scheduled_start_date" invisible="1"/>
+                <label for="actual_end_date" string="Actual Start &amp; End Date" invisible="not actual_start_date or not sale_line_id"/>
+                <field name="actual_end_date" wigdet="daterange" options="{'start_date_field': 'actual_start_date'}" nolabel="1" readonly="1" invisible="not sale_line_id"/>
+                <field name="actual_start_date" invisible="1"/>
+                <field name="delay_early_planned" invisible="state != '1_done'"/>
+                <field name="delay_early_actual" invisible="state != '1_done'"/>
+            </xpath>
+            <xpath expr="//group/field[@name='tag_ids']" position="after">
+                <field name="creation_plan" readonly="sale_line_id"/>
+            </xpath>
+            <xpath expr="//div[@invisible='not active']/field[@name='state']" position="attributes">
+                <attribute name="readonly">state == '04_waiting_normal'</attribute>
+            </xpath>
+            <xpath expr="//div[@invisible='active']/field[@name='state']" position="attributes">
+                <attribute name="readonly">state == '04_waiting_normal'</attribute>
+            </xpath>
+            <xpath expr="//div[@id='date_deadline_and_recurring_task']/field[@name='date_deadline']" position="attributes">
+                <attribute name="readonly">sale_line_id</attribute>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="after">
+                <widget name="web_ribbon" title="Delay" bg_color="text-bg-danger" style="opacity: 70%;" invisible="delay_early_actual &gt; 0 or not delay_early_actual"/>
+                <widget name="web_ribbon" title="Early" bg_color="text-bg-success" style="opacity: 70%;" invisible="delay_early_actual &lt; 0 or not delay_early_actual"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="project_task_view_tree_main_base_inherit" model="ir.ui.view">
+        <field name="name">project.task.list.inherit</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.project_task_view_tree_main_base"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_ids']" position="after">
+                <field name="creation_plan" optional="hide"/>
+                <field name="no_of_days" optional="show"/>
+                <field name="planned_scheduled_start_date" column_invisible="True"/>
+                <field name="planned_scheduled_end_date" string="Plan Schedule" widget="daterange" options="{'start_date_field': 'planned_scheduled_start_date'}" optional="show"/>
+                <field name="actual_start_date" column_invisible="True"/>
+                <field name="actual_end_date" string="Actual Start &amp; End Date" widget="daterange" options="{'start_date_field': 'actual_start_date'}" optional="show"/>
+                <field name="delay_early_planned" optional="show"/>
+                <field name="delay_early_actual" decoration-danger="delay_early_actual &lt; 0" decoration-success="delay_early_actual &gt; 0" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_sale_project_task_form_inherit" model="ir.ui.view">
+        <field name="name">sale.project.task.form.inherit</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="sale_project.view_sale_project_inherit_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='sale_line_div']/field[@groups='sales_team.group_sale_salesman']" position="attributes">
+                <attribute name="readonly">sale_line_id</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>
