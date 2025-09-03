@@ -22,25 +22,7 @@ class SurveyQuestion(models.Model):
             self.ensure_one()
             if self.constr_mandatory and not answer:
                 return {self.id: self.constr_error_msg or _('This question requires an attachment.')}
-            return {}
-
-        if not answer and self.question_type not in ['simple_choice', 'multiple_choice']:
-            if self.constr_mandatory and not self.survey_id.users_can_go_back:
-                return {self.id: self.constr_error_msg or _('This question requires an answer.')}
-        else:
-            if self.question_type == 'char_box':
-                return self._validate_char_box(answer)
-            elif self.question_type == 'numerical_box':
-                return self._validate_numerical_box(answer)
-            elif self.question_type in ['date', 'datetime']:
-                return self._validate_date(answer)
-            elif self.question_type in ['simple_choice', 'multiple_choice']:
-                return self._validate_choice(answer, comment)
-            elif self.question_type == 'matrix':
-                return self._validate_matrix(answer)
-            elif self.question_type == 'scale':
-                return self._validate_scale(answer)
-        return {}
+        return super().validate_question(answer, comment=comment)
 
     def _validate_attachment(self):
         """Validate attachment by checking is_attachment_given boolean."""
