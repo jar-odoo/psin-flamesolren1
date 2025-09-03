@@ -10,7 +10,8 @@
         "base_address_extended",
         "sale_management",
         "purchase",
-        "approvals"
+        "approvals",
+        "stock"
     ],
     "data": [
         "security/ir.model.access.csv",
@@ -19,6 +20,8 @@
         "views/discount_master_view.xml",
         "views/product_product_view.xml",
         "views/sale_order_views.xml",
+        "views/stock_picking_type_view.xml",
+        "views/stock_picking_view.xml",
     ],
     "installable": True,
     "application": False,
