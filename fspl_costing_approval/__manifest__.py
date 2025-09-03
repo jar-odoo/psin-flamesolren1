@@ -15,6 +15,7 @@
     ],
     "data": [
         "security/ir.model.access.csv",
+        "security/security.xml",
         "views/approval_request_view.xml",
         "views/margin_master_view.xml",
         "views/discount_master_view.xml",

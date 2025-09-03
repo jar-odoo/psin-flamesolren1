@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="group_restrict_cost" model="res.groups">
+        <field name="name">Restrict Cost</field>
+        <field name="category_id" ref="base.module_category_usability"/>
+    </record>
+    <record id="group_restrict_master_price" model="res.groups">
+        <field name="name">Restrict Master Price</field>
+        <field name="category_id" ref="base.module_category_usability"/>
+    </record>
+    <record id="group_restrict_total_cost" model="res.groups">
+        <field name="name">Restrict Total Costing</field>
+        <field name="category_id" ref="base.module_category_usability"/>
+    </record>
+</odoo>

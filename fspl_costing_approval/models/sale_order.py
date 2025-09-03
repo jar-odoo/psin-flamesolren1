@@ -10,7 +10,7 @@ class SaleOrder(models.Model):
     expense_cost = fields.Float(string="Expense Cost", store=True, compute="_compute_costs", copy=False)
     margin_amount = fields.Float(string="Margin", tracking=True, copy=False, store=True)
     discount_amount = fields.Float(string="Discount", tracking=True, copy=False, store=True)
-    margin_with_dc = fields.Float(string="Margin with DC", copy=False)
+    margin_with_dc = fields.Float(string="Margin with DC", copy=False, compute='_calculate_margin_with_dc_capacity', store=True)
     discount_with_dc = fields.Float(string="Discount with DC", copy=False)
     final_sales_kwp_without_tax = fields.Float(string="Final Amount /kwp Untaxed", copy=False, compute='_compute_base_amount', store=True)
     final_amt_without_tax = fields.Float(string="Final Amount Untaxed", copy=False, compute='_compute_base_amount', store=True)
@@ -78,19 +78,40 @@ class SaleOrder(models.Model):
                 company=order.company_id,
             )
 
-    @api.onchange('dc_capacity_kwp', 'margin_amount')
-    def _check_margin_or_raise_exception(self):
+    @api.depends('dc_capacity_kwp')
+    def _calculate_margin_with_dc_capacity(self):
         for order in self:
             if not order.dc_capacity_kwp:
                 return
             per_kw_margin = order.margin_amount * order.dc_capacity_kwp
             margin_master = self.env['margin.master'].search([('user_ids', 'in', self.env.user.id), '|', ('city_id', '=', order.partner_id.city_id.id), ('city_id.name', '=', order.partner_id.city)], limit=1)
-            if not margin_master:
-                continue
-            if per_kw_margin and per_kw_margin > margin_master.margin_per_kw:
-                raise UserError(_("Margin exceeds, allowed value is %s per KW" % margin_master.margin_per_kw))
-            else:
+            if margin_master and order.dc_capacity_kwp:
+                per_kw_margin = margin_master.margin_per_kw * order.dc_capacity_kwp
                 order.margin_with_dc = per_kw_margin
+            else:
+                order.margin_with_dc = 0.0
+
+    def action_send_for_approval(self):
+        for order in self:
+            per_kw_discount = order.discount_amount * order.dc_capacity_kwp
+            discount_master = self.env['discount.master'].search([
+                ('user_ids', 'in', self.env.user.id),
+                '|',
+                ('city_id', '=', order.partner_id.city_id.id),
+                ('city_id.name', '=', order.partner_id.city)
+            ], limit=1)
+            approval = self.env['approval.request'].create({
+                'name': f"Discount Approval for {order.name}",
+                'request_owner_id': self.env.user.id,
+                'category_id': discount_master.approval_category_id.id,
+                'sale_order_id': order._origin.id,
+                'reason': f"Discount of ₹{order.discount_amount} exceeds allowed per-kW for {order.dc_capacity_kwp} kW",
+            })
+            order._origin.write({
+                'approval_request_id': approval.id,
+                'approval_requested': True
+                })
+            order.action_lock()
 
     @api.onchange('discount_amount', 'dc_capacity_kwp')
     def action_check_discount_and_create_approval(self):

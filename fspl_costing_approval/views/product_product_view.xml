@@ -6,8 +6,11 @@
         <field name="inherit_id" ref="product.product_normal_form_view" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='product_tooltip']" position="after">
-                <field name="master_price"/>
-                <field name="last_price" readonly="1"/>
+                <field name="master_price" groups="!fspl_costing_approval.group_restrict_master_price"/>
+                <field name="last_price" readonly="1" groups="!fspl_costing_approval.group_restrict_cost"/>
+            </xpath>
+            <xpath expr="//field[@name='standard_price']" position="attributes">
+                <attribute name="groups">!fspl_costing_approval.group_restrict_cost</attribute>
             </xpath>
         </field>
     </record>

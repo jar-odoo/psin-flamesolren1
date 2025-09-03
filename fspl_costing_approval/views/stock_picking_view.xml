@@ -10,8 +10,8 @@
                 <field name="is_total_amount" invisible="1"/>
             </field>
             <xpath expr="//page[@name='operations']/field[@name='move_ids_without_package']/list/field[@name='product_uom']" position="after">
-                <field name="last_purchase_price" column_invisible="parent.state in ['draft', 'waiting', 'confirmed', 'assigned'] or not parent.is_last_purchase_price"/>
-                <field name="total_amount" column_invisible="parent.state in ['draft', 'waiting', 'confirmed', 'assigned'] or not parent.is_total_amount"/>
+                <field name="last_purchase_price" column_invisible="parent.state in ['draft', 'waiting', 'confirmed', 'assigned'] or not parent.is_last_purchase_price" groups="!fspl_costing_approval.group_restrict_cost"/>
+                <field name="total_amount" column_invisible="parent.state in ['draft', 'waiting', 'confirmed', 'assigned'] or not parent.is_total_amount" groups="!fspl_costing_approval.group_restrict_cost"/>
             </xpath>
         </field>
     </record>
