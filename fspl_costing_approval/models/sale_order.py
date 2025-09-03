@@ -8,17 +8,17 @@ class SaleOrder(models.Model):
     base_amount_per_kw = fields.Float(string="Base Amount per KW", compute="_compute_base_amount", store=True, copy=False)
     material_cost = fields.Float(string="Material Cost", store=True, compute="_compute_costs", copy=False)
     expense_cost = fields.Float(string="Expense Cost", store=True, compute="_compute_costs", copy=False)
-    margin_amount = fields.Float(string="Margin", tracking=True, copy=False, store=True)
     discount_amount = fields.Float(string="Discount", tracking=True, copy=False, store=True)
     margin_with_dc = fields.Float(string="Margin with DC", copy=False, compute='_calculate_margin_with_dc_capacity', store=True)
     discount_with_dc = fields.Float(string="Discount with DC", copy=False)
     final_sales_kwp_without_tax = fields.Float(string="Final Amount /kwp Untaxed", copy=False, compute='_compute_base_amount', store=True)
     final_amt_without_tax = fields.Float(string="Final Amount Untaxed", copy=False, compute='_compute_base_amount', store=True)
     approval_requested = fields.Boolean(string="Approval Requested", copy=False, readonly=True)
-    sales_70 = fields.Float(string="70% Amount", readonly=True, copy=False)
-    sales_30 = fields.Float(string="30% Amount", readonly=True, copy=False)
+    sales_70 = fields.Float(string="70% Amount", readonly=True, copy=False, compute='_compute_final_amt_without_tax', store=True)
+    sales_30 = fields.Float(string="30% Amount", readonly=True, copy=False, compute='_compute_final_amt_without_tax', store=True)
     option_tax_totals = fields.Binary(compute='_compute_option_tax_totals_json', exportable=False)
     approval_request_id = fields.Many2one('approval.request', string='Discount Approval Request', readonly=True, copy=False)
+    discount_tooltip = fields.Char(readonly=True)
 
 
     def action_open_discount_approval(self):
@@ -49,7 +49,7 @@ class SaleOrder(models.Model):
             material_total = 0.0
             expense_total = 0.0
             for line in order.sale_order_option_ids:
-                if line.product_id.is_storable and line.product_id.tracking != 'none':
+                if line.product_id.is_storable:
                     material_total += line.final_amount
                 else:
                     expense_total += line.final_amount
@@ -81,9 +81,6 @@ class SaleOrder(models.Model):
     @api.depends('dc_capacity_kwp')
     def _calculate_margin_with_dc_capacity(self):
         for order in self:
-            if not order.dc_capacity_kwp:
-                return
-            per_kw_margin = order.margin_amount * order.dc_capacity_kwp
             margin_master = self.env['margin.master'].search([('user_ids', 'in', self.env.user.id), '|', ('city_id', '=', order.partner_id.city_id.id), ('city_id.name', '=', order.partner_id.city)], limit=1)
             if margin_master and order.dc_capacity_kwp:
                 per_kw_margin = margin_master.margin_per_kw * order.dc_capacity_kwp
@@ -114,7 +111,7 @@ class SaleOrder(models.Model):
             order.action_lock()
 
     @api.onchange('discount_amount', 'dc_capacity_kwp')
-    def action_check_discount_and_create_approval(self):
+    def action_check_discount(self):
         for order in self:
             discount_master = self.env['discount.master'].search([
                 ('user_ids', 'in', self.env.user.id),
