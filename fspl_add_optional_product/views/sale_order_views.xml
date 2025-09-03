@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_form_inherit_optional_fields" model="ir.ui.view">
+        <field name="name">sale.order.form.optional.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='sequence']" position="after">
+                <field name="is_selected" />
+            </xpath>
+
+            <xpath expr="//field[@name='sale_order_option_ids']" position="before">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center">
+                        <field name="select_all_options" widget="checkbox" class="me-2"/>
+                        <label for="select_all_options" class="mb-0"/>
+                    </div>
+                    <button name="action_add_selected_options_to_order" type="object" string="Add to Cart" class="btn btn-primary"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
