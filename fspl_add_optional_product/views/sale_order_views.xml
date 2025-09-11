@@ -6,16 +6,46 @@
         <field name="inherit_id" ref="sale.view_order_form" />
         <field name="arch" type="xml">
             <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='sequence']" position="after">
-                <field name="is_selected" />
+                <field name="is_selected" readonly="not parent.state == 'sale'" force_save="1"/>
             </xpath>
-
+            <xpath expr="//field[@name='sale_order_option_ids']" position="attributes">
+                <attribute name="readonly">state == 'cancel'</attribute>
+            </xpath>
+            <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='sequence']" position="attributes">
+                <attribute name="readonly">parent.state == 'sale'</attribute>
+            </xpath>
+            <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='required_qty']" position="attributes">
+                <attribute name="readonly">parent.state == 'sale'</attribute>
+            </xpath>
+            <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='required_qty']" position="after">
+                <field name="project_coordinator_qty" />
+            </xpath>
+            <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='product_id']" position="attributes">
+                <attribute name="readonly">parent.state == 'sale'</attribute>
+            </xpath>
+            <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='name']" position="attributes">
+                <attribute name="readonly">parent.state == 'sale'</attribute>
+            </xpath>
+            <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='quantity']" position="attributes">
+                <attribute name="readonly">parent.state == 'sale'</attribute>
+            </xpath>
+            <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='uom_id']" position="attributes">
+                <attribute name="readonly">parent.state == 'sale'</attribute>
+            </xpath>
+            <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='product_uom_category_id']" position="attributes">
+                <attribute name="readonly">parent.state == 'sale'</attribute>
+            </xpath>
+            <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/button[@name='button_add_to_order']" position="attributes">
+                <attribute name="invisible">is_present or not parent.state == 'sale'</attribute>
+                <attribute name="context">{'fspl_add_options': True}</attribute>
+            </xpath>
             <xpath expr="//field[@name='sale_order_option_ids']" position="before">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <div class="d-flex align-items-center">
                         <field name="select_all_options" widget="checkbox" class="me-2"/>
                         <label for="select_all_options" class="mb-0"/>
                     </div>
-                    <button name="action_add_selected_options_to_order" type="object" string="Add to Cart" class="btn btn-primary"/>
+                    <button name="action_add_selected_options_to_order" type="object" string="Add to Cart" class="btn btn-primary" invisible="not state == 'sale'"/>
                 </div>
             </xpath>
         </field>
