@@ -16,3 +16,9 @@ class SaleOrderOption(models.Model):
         result = super()._get_values_to_add_to_order()
         result.update({'price_unit': 0.00, 'product_uom_qty': self.project_coordinator_qty})
         return result
+
+    def _can_be_edited_on_portal(self):
+        self.ensure_one()
+        if self._context.get('fspl_add_options', False):
+            return True
+        return super()._can_be_edited_on_portal()
