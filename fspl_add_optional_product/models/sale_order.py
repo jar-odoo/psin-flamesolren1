@@ -25,3 +25,9 @@ class SaleOrder(models.Model):
             for option in order.sale_order_option_ids:
                 option.write({'project_coordinator_qty': option.required_qty})
         return super().action_confirm()
+
+    def _can_be_edited_on_portal(self):
+        self.ensure_one()
+        if self._context.get('fspl_add_options', False):
+            return True
+        return super()._can_be_edited_on_portal()
