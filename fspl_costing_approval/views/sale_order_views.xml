@@ -25,16 +25,16 @@
                 <field name="sales_30" readonly="1" class="text-danger fw-bold" force_save="1"/>
             </field>
             <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='quantity']" position="after">
-                <field name="required_qty" readonly="parent.approval_requested"/>
+                <field name="required_qty" readonly="parent.approval_requested or parent.state == 'sale'"/>
                 <field name="standard_cost_price" readonly="1" groups="!fspl_costing_approval.group_restrict_cost"/>
                 <field name="last_previous_price" readonly="1" groups="!fspl_costing_approval.group_restrict_cost"/>
-                <field name="tax_id" widget="many2many_tags" readonly="parent.approval_requested"/>
+                <field name="tax_id" widget="many2many_tags" readonly="parent.approval_requested or parent.state == 'sale'"/>
             </xpath>
             <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='discount']" position="after">
-                <field name="final_amount" readonly="parent.approval_requested" groups="!fspl_costing_approval.group_restrict_master_price"/>
+                <field name="final_amount" readonly="parent.approval_requested or parent.state == 'sale'" groups="!fspl_costing_approval.group_restrict_master_price"/>
             </xpath>
             <xpath expr="//notebook/page[@name='optional_products']//field[@name='sale_order_option_ids']/list/field[@name='price_unit']" position="attributes">
-                <attribute name="readonly">parent.approval_requested</attribute>
+                <attribute name="readonly">parent.approval_requested or parent.state == 'sale'</attribute>
                 <attribute name="groups">!fspl_costing_approval.group_restrict_master_price</attribute>
             </xpath>
             <xpath expr="//page[@name='optional_products']/field[@name='sale_order_option_ids']" position="after">
