@@ -41,8 +41,8 @@ class SaleOrder(models.Model):
                 optional_products_untaxed_amt = sum(order.sale_order_option_ids.mapped('final_amount'))
                 margin_per_kw = order.margin_with_dc / order.dc_capacity_kwp if order.dc_capacity_kwp > 0 else 0
                 order.base_amount_per_kw = optional_products_untaxed_amt / order.dc_capacity_kwp
-                order.final_sales_kwp_without_tax = order.base_amount_per_kw + margin_per_kw - order.discount_with_dc
-                order.final_amt_without_tax = order.final_sales_kwp_without_tax * order.dc_capacity_kwp
+                order.final_sales_kwp_without_tax = order.base_amount_per_kw + margin_per_kw
+                order.final_amt_without_tax = (order.final_sales_kwp_without_tax * order.dc_capacity_kwp) - order.discount_with_dc
 
     @api.depends('sale_order_option_ids')
     def _compute_costs(self):
