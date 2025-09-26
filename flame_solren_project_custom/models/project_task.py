@@ -60,16 +60,6 @@ class ProjectTask(models.Model):
     def _onchange_project_id(self):
         if self.state != '04_waiting_normal':
             self.state = '05_to_do'
-
-    def _auto_chain_blockers(self):
-        for task in self:
-            blockers = task.depend_on_ids
-            fs_blockers = blockers.filtered(lambda b: not b.creation_plan)
-            for i in range(len(fs_blockers) - 1):
-                curr_task = fs_blockers[i]
-                next_task = fs_blockers[i + 1]
-                if curr_task.id != next_task.id and curr_task.id not in next_task.depend_on_ids.ids:
-                    next_task.write({'depend_on_ids': [(4, curr_task.id)]})
     
     def _schedule_tasks_finish_to_start(self, base_date):
         sale_date = base_date.date() + timedelta(days=1)
@@ -108,56 +98,28 @@ class ProjectTask(models.Model):
             today = date.today()  
             new_state = vals['state']
             for task in self:
-                if task.creation_plan:
-                    if new_state == '1_done':
-                        if not task.date_deadline:
-                            task.date_deadline = today
-                        dependent_tasks = self.env['project.task'].search([
-                            ('depend_on_ids', 'in', task.id)
-                        ])
-                        for dep_task in dependent_tasks:
-                            dep_task.actual_start_date = task.date_deadline + timedelta(days=1)
-                            dep_task.actual_end_date = dep_task.actual_start_date + timedelta(days=dep_task.no_of_days)
-                    elif new_state == '01_in_progress':
-                        if not task.actual_start_date:
-                            task.actual_start_date = today
-                            task.actual_end_date = task.actual_start_date + timedelta(days=task.no_of_days)
-                    else:
-                        if task.date_deadline:
-                            task.date_deadline = False
-                        dependent_tasks = self.env['project.task'].search([
-                            ('depend_on_ids', 'in', task.id),
-                        ])
-                        for dependent_task in dependent_tasks:
-                            dependent_task.write({
-                                'actual_start_date': False,
-                                'actual_end_date': False
-                            })
+                if new_state == '1_done':
+                    if not task.date_deadline:
+                        task.date_deadline = today
+                    dependent_tasks = self.env['project.task'].search([
+                        ('depend_on_ids', 'in', task.id)
+                    ])
+                    for dep_task in dependent_tasks:
+                        dep_task.actual_start_date = task.date_deadline + timedelta(days=1)
+                        dep_task.actual_end_date = dep_task.actual_start_date + timedelta(days=dep_task.no_of_days)
+                elif new_state == '01_in_progress' and not task.depend_on_ids:
+                    if not task.actual_start_date:
+                        task.actual_start_date = today
+                        task.actual_end_date = task.actual_start_date + timedelta(days=task.no_of_days)
                 else:
-                    if new_state == '1_done':
-                        if not task.date_deadline:
-                            task.date_deadline = today
-                        dependent_tasks = self.env['project.task'].search([
-                            ('depend_on_ids', 'in', task.id),
-                            ('creation_plan', '=', False)
-                        ])
-                        for dep_task in dependent_tasks:
-                            dep_task.actual_start_date = task.date_deadline + timedelta(days=1)
-                            dep_task.actual_end_date = dep_task.actual_start_date + timedelta(days=dep_task.no_of_days)
-                    elif new_state == '01_in_progress' and not task.depend_on_ids:
-                        if not task.actual_start_date:
-                            task.actual_start_date = today
-                            task.actual_end_date = task.actual_start_date + timedelta(days=task.no_of_days)
-                    else:
-                        if task.date_deadline:
-                            task.date_deadline = False
-                        dependent_tasks = self.env['project.task'].search([
-                            ('depend_on_ids', 'in', task.id),
-                            ('creation_plan', '=', False)
-                        ])
-                        for dependent_task in dependent_tasks:
-                            dependent_task.write({
-                                'actual_start_date': False,
-                                'actual_end_date': False
-                            })
+                    if task.date_deadline:
+                        task.date_deadline = False
+                    dependent_tasks = self.env['project.task'].search([
+                        ('depend_on_ids', 'in', task.id),
+                    ])
+                    for dependent_task in dependent_tasks:
+                        dependent_task.write({
+                            'actual_start_date': False,
+                            'actual_end_date': False
+                        })
         return res

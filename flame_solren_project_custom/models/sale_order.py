@@ -13,7 +13,6 @@ class SaleOrder(models.Model):
                 ('sale_line_id', 'in', order.order_line.ids),
             ])
             if tasks:
-                tasks._auto_chain_blockers()
                 tasks._schedule_tasks_finish_to_start(order.date_order)
                 for task in tasks:
                     if not task.depend_on_ids:
