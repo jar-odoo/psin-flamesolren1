@@ -19,9 +19,6 @@
                 <field name="delay_early_planned" invisible="state != '1_done'"/>
                 <field name="delay_early_actual" invisible="state != '1_done'"/>
             </xpath>
-            <xpath expr="//group/field[@name='tag_ids']" position="after">
-                <field name="creation_plan" readonly="sale_line_id"/>
-            </xpath>
             <xpath expr="//div[@invisible='not active']/field[@name='state']" position="attributes">
                 <attribute name="readonly">state == '04_waiting_normal'</attribute>
             </xpath>
@@ -44,7 +41,6 @@
         <field name="inherit_id" ref="project.project_task_view_tree_main_base"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='user_ids']" position="after">
-                <field name="creation_plan" optional="hide"/>
                 <field name="no_of_days" optional="show"/>
                 <field name="planned_scheduled_start_date" column_invisible="True"/>
                 <field name="planned_scheduled_end_date" string="Plan Schedule" widget="daterange" options="{'start_date_field': 'planned_scheduled_start_date'}" optional="show"/>

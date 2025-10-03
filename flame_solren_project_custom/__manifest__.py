@@ -9,10 +9,9 @@
                     confirmation date and the number of days specified for that task. When a task's state is changed
                     to In Progress or Done, its actual start and end dates—along with those of any dependent tasks 
                     are updated accordingly. This allows the system to determine whether a task was completed early
-                    or delayed by comparing the actual and planned dates.Tasks listed in the Blocked By field are 
-                    executed sequentially; a parent task cannot begin until all its dependent (child) tasks are 
-                    marked as Done, otherwise it will remain in the Waiting state. However, tasks with the Creation
-                    Plan enabled are independent and can start without waiting for other tasks to be completed.
+                    or delayed by comparing the actual and planned dates. In case of multiple tasks listed in Blocked 
+                    By of any particular task, the parent task's actual start and end date will be based on the latest
+                    of it's dependent (child) tasks, until then it will remain in the custom Waiting state.
                 """,
     'odoo_task_id' : '4852712',
     'category': 'Customizations',

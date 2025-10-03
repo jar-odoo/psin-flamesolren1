@@ -11,7 +11,6 @@ class ProjectTask(models.Model):
     no_of_days = fields.Integer(string="No. of Days", help='The number of days estimated or planned for the task', tracking=True)
     planned_scheduled_start_date = fields.Date(string="Planned Scheduled Start Date", compute="_compute_planned_scheduled_start_date", store=True , tracking=True)
     planned_scheduled_end_date = fields.Date(string="Planned Scheduled End Date", compute="_compute_planned_scheduled_end_date", store=True, tracking=True)
-    creation_plan = fields.Boolean(string="Creation Plan", tracking=True)
     actual_start_date = fields.Date(string="Actual Start Date", tracking=True)
     actual_end_date = fields.Date(string="Actual End Date", tracking=True)
     state = fields.Selection(
@@ -42,10 +41,10 @@ class ProjectTask(models.Model):
         for task in self:
             task.delay_early_actual = task._compute_delay_task(task.actual_end_date, task.date_deadline)
     
-    @api.depends('sale_line_id', 'creation_plan')
+    @api.depends('sale_line_id')
     def _compute_planned_scheduled_start_date(self):
         for task in self:
-            if task.sale_line_id and task.sale_line_id.order_id.date_order and task.creation_plan:
+            if task.sale_line_id and task.sale_line_id.order_id.date_order:
                 task.planned_scheduled_start_date = task.sale_line_id.order_id.date_order.date() + timedelta(days=1)
                 
     @api.depends('no_of_days')
@@ -80,11 +79,9 @@ class ProjectTask(models.Model):
         all_tasks = self | self.mapped('dependent_ids')
         sorted_tasks = get_tasks_in_dependency_order(all_tasks)
         for task in sorted_tasks:
-            if task.creation_plan:
-                continue
             latest_end = sale_date - timedelta(days=1)
             for dep in task.depend_on_ids:
-                if not dep.creation_plan and dep.id in date_map:
+                if dep.id in date_map:
                     latest_end = max(latest_end, date_map[dep.id])
             start = latest_end + timedelta(days=1)
             end = start + timedelta(days=task.no_of_days or 0)

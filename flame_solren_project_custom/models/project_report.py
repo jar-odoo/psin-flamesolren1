@@ -6,7 +6,6 @@ from odoo import fields, models
 class ReportProjectTaskUser(models.Model):
     _inherit = "report.project.task.user"
     
-    creation_plan = fields.Boolean(string="Creation Plan", readonly=True)
     no_of_days = fields.Integer(string="No. of Days", help='The number of days estimated or planned for the task', readonly=True)
     planned_scheduled_start_date = fields.Date(string="Planned Scheduled Start Date", readonly=True)
     planned_scheduled_end_date = fields.Date(string="Planned Scheduled End Date", readonly=True)
@@ -18,7 +17,6 @@ class ReportProjectTaskUser(models.Model):
     
     def _select(self):
         return super()._select() +  """,
-                t.creation_plan,
                 t.no_of_days,
                 t.planned_scheduled_start_date,
                 t.planned_scheduled_end_date,
@@ -28,7 +26,6 @@ class ReportProjectTaskUser(models.Model):
     
     def _group_by(self):
         return super()._group_by() + """,
-                t.creation_plan,
                 t.no_of_days,
                 t.planned_scheduled_start_date,
                 t.planned_scheduled_end_date,
